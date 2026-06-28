@@ -235,11 +235,11 @@ function App() {
         {!activeDoc && !isLoading && !error && (
           <div className="upload-container">
             <div className="header-section">
-              <h1>Document Intelligence</h1>
-              <p className="subtitle">Upload a PDF to parse layout structure, key points, and summary</p>
+              <h1>Instant AI Document Summarizer</h1>
+              <p className="subtitle">Upload any PDF to extract structured section summaries, key takeaways, and keywords in seconds.</p>
             </div>
 
-            <div
+            <div 
               className={`dropzone ${dragActive ? 'drag-active' : ''}`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -247,19 +247,19 @@ function App() {
               onDrop={handleDrop}
               onClick={triggerFileSelect}
             >
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
                 accept=".pdf"
-                onChange={onFileChange}
+                onChange={onFileChange} 
               />
               <div className="dropzone-icon">
                 <IconUpload />
               </div>
               <div className="dropzone-text">
-                <h3>Drag and drop your PDF here</h3>
-                <p>or click to browse local files</p>
+                <h3>Drag & drop your PDF here</h3>
+                <p>or click to browse local files (max 10 MB)</p>
               </div>
             </div>
 
@@ -274,6 +274,21 @@ function App() {
                 </button>
               </div>
             )}
+
+            <div className="features-grid">
+              <div className="feature-item">
+                <div className="feature-title">⚡ Instant Summaries</div>
+                <div className="feature-desc">Upload your document and let AI generate concise summaries and key takeaways automatically.</div>
+              </div>
+              <div className="feature-item">
+                <div className="feature-title">Preserved Structure</div>
+                <div className="feature-desc">Maintains headings and layouts so you can review section-by-section details seamlessly.</div>
+              </div>
+              <div className="feature-item">
+                <div className="feature-title">🔒 Fast & Secure</div>
+                <div className="feature-desc">Supports PDF documents up to 10 MB. Files are processed in memory and deleted instantly.</div>
+              </div>
+            </div>
           </div>
         )}
 
