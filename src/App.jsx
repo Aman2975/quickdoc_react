@@ -159,23 +159,23 @@ function App() {
       
       // Parse sections into a unified format: Array of { title, content }
       let unifiedSections = [];
+      const rawSections = data.sections || data.Sections || data.section_summaries || data["section summaries"] || data.sectionSummaries || data.summaries || data.Summaries;
       
-      if (Array.isArray(data.sections)) {
-        unifiedSections = data.sections.map(sec => ({
-          title: safeString(sec.heading || sec.title || sec.name || ""),
+      if (Array.isArray(rawSections)) {
+        unifiedSections = rawSections.map(sec => ({
+          title: safeString(sec.heading || sec.title || sec.name || sec.section || ""),
           content: safeString(sec.summary || sec.content || sec.text || "")
         }));
-      } else if (Array.isArray(data.Sections)) {
-        unifiedSections = data.Sections.map(sec => ({
-          title: safeString(sec.heading || sec.title || sec.name || ""),
-          content: safeString(sec.summary || sec.content || sec.text || "")
+      } else if (typeof rawSections === 'object' && rawSections !== null) {
+        unifiedSections = Object.keys(rawSections).map(key => ({
+          title: safeString(key),
+          content: safeString(rawSections[key])
         }));
       } else {
-        const summariesMap = data.summaries || data.Summaries || {};
-        const headingsList = data.headings || data.Headings || Object.keys(summariesMap);
+        const headingsList = data.headings || data.Headings || [];
         unifiedSections = headingsList.map(headingText => ({
           title: safeString(headingText),
-          content: safeString(summariesMap[headingText] || "")
+          content: "No summary available for this section."
         }));
       }
 
@@ -376,25 +376,18 @@ function App() {
                   <span>Document Structure</span>
                 </div>
                 {activeDoc.sections && activeDoc.sections.length > 0 ? (
-                  <div className="headings-list">
+                  <div className="sections-timeline">
                     {activeDoc.sections.map((section, idx) => {
                       const cleanTitle = section.title.replace(/^##\s+/, "");
-                      const isOpen = !!openHeadings[section.title];
-
                       return (
-                        <div key={idx} className="heading-accordion-item">
-                          <div
-                            className="heading-accordion-header"
-                            onClick={() => toggleHeading(section.title)}
-                          >
-                            <span>{cleanTitle}</span>
-                            <IconChevronDown isOpen={isOpen} />
+                        <div key={idx} className="timeline-item">
+                          <div className="timeline-marker">
+                            <span className="timeline-number">{idx + 1}</span>
                           </div>
-                          {isOpen && section.content && (
-                            <div className="heading-accordion-content">
-                              {section.content}
-                            </div>
-                          )}
+                          <div className="timeline-content">
+                            <h4 className="timeline-title">{cleanTitle}</h4>
+                            <p className="timeline-desc">{section.content}</p>
+                          </div>
                         </div>
                       );
                     })}
