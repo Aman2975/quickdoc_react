@@ -156,21 +156,39 @@ function App() {
 
       // Format document data to make sure key structures exist with fallback naming mapping
       let mainSummary = data.summary || data.Summary || data.executive_summary || data.executiveSummary || data.description;
-      const summariesMap = data.summaries || data.Summaries || {};
-      if (!mainSummary && Object.keys(summariesMap).length > 0) {
-        // Fallback to using the first section's summary as the executive summary
-        mainSummary = Object.values(summariesMap)[0];
+      
+      // Parse sections into a unified format: Array of { title, content }
+      let unifiedSections = [];
+      
+      if (Array.isArray(data.sections)) {
+        unifiedSections = data.sections.map(sec => ({
+          title: safeString(sec.heading || sec.title || sec.name || ""),
+          content: safeString(sec.summary || sec.content || sec.text || "")
+        }));
+      } else if (Array.isArray(data.Sections)) {
+        unifiedSections = data.Sections.map(sec => ({
+          title: safeString(sec.heading || sec.title || sec.name || ""),
+          content: safeString(sec.summary || sec.content || sec.text || "")
+        }));
+      } else {
+        const summariesMap = data.summaries || data.Summaries || {};
+        const headingsList = data.headings || data.Headings || Object.keys(summariesMap);
+        unifiedSections = headingsList.map(headingText => ({
+          title: safeString(headingText),
+          content: safeString(summariesMap[headingText] || "")
+        }));
+      }
+
+      if (!mainSummary && unifiedSections.length > 0) {
+        // Fallback to using the first section's summary/content as the main summary
+        mainSummary = unifiedSections[0].content;
       }
 
       const docData = {
         title: safeString(data.title || data.Title || data.document_title || data.documentTitle || selectedFile.name.replace(/\.[^/.]+$/, "")),
         summary: safeString(mainSummary || "No summary provided."),
-        headings: ensureArray(data.headings || data.Headings || data.sections || data.Sections),
-        summaries: Object.keys(summariesMap).reduce((acc, key) => {
-          acc[key] = safeString(summariesMap[key]);
-          return acc;
-        }, {}),
-        key_points: ensureArray(data.key_points || data.keypoints || data.KeyPoints || data.Key_Points || data.key_takeaways || data.keyTakeaways),
+        sections: unifiedSections,
+        key_points: ensureArray(data.key_points || data["key points"] || data.keypoints || data.KeyPoints || data.Key_Points || data.key_takeaways || data.keyTakeaways),
         keywords: ensureArray(data.keywords || data.Keywords || data.tags || data.Tags)
       };
 
@@ -342,25 +360,24 @@ function App() {
                   <IconHeadingList />
                   <span>Document Structure</span>
                 </div>
-                {activeDoc.headings && activeDoc.headings.length > 0 ? (
+                {activeDoc.sections && activeDoc.sections.length > 0 ? (
                   <div className="headings-list">
-                    {activeDoc.headings.map((headingText, idx) => {
-                      const cleanTitle = headingText.replace(/^##\s+/, "");
-                      const content = activeDoc.summaries[headingText] || "No summary available for this section.";
-                      const isOpen = !!openHeadings[headingText];
+                    {activeDoc.sections.map((section, idx) => {
+                      const cleanTitle = section.title.replace(/^##\s+/, "");
+                      const isOpen = !!openHeadings[section.title];
 
                       return (
                         <div key={idx} className="heading-accordion-item">
                           <div
                             className="heading-accordion-header"
-                            onClick={() => toggleHeading(headingText)}
+                            onClick={() => toggleHeading(section.title)}
                           >
                             <span>{cleanTitle}</span>
                             <IconChevronDown isOpen={isOpen} />
                           </div>
-                          {isOpen && content && (
+                          {isOpen && section.content && (
                             <div className="heading-accordion-content">
-                              {content}
+                              {section.content}
                             </div>
                           )}
                         </div>
