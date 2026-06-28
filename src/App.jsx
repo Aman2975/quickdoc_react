@@ -147,6 +147,12 @@ function App() {
         return String(val);
       };
 
+      const ensureArray = (val) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val.map(safeString);
+        return [safeString(val)];
+      };
+
       // Format document data to make sure key structures exist with fallback naming mapping
       let mainSummary = data.summary || data.Summary || data.executive_summary || data.executiveSummary || data.description;
       const summariesMap = data.summaries || data.Summaries || {};
@@ -158,13 +164,13 @@ function App() {
       const docData = {
         title: safeString(data.title || data.Title || data.document_title || data.documentTitle || selectedFile.name.replace(/\.[^/.]+$/, "")),
         summary: safeString(mainSummary || "No summary provided."),
-        headings: (data.headings || data.Headings || data.sections || data.Sections || []).map(safeString),
+        headings: ensureArray(data.headings || data.Headings || data.sections || data.Sections),
         summaries: Object.keys(summariesMap).reduce((acc, key) => {
           acc[key] = safeString(summariesMap[key]);
           return acc;
         }, {}),
-        key_points: (data.key_points || data.keypoints || data.KeyPoints || data.Key_Points || data.key_takeaways || data.keyTakeaways || []).map(safeString),
-        keywords: (data.keywords || data.Keywords || data.tags || data.Tags || []).map(safeString)
+        key_points: ensureArray(data.key_points || data.keypoints || data.KeyPoints || data.Key_Points || data.key_takeaways || data.keyTakeaways),
+        keywords: ensureArray(data.keywords || data.Keywords || data.tags || data.Tags)
       };
 
       setActiveDoc(docData);
