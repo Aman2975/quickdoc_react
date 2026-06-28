@@ -156,11 +156,11 @@ function App() {
 
       // Format document data to make sure key structures exist with fallback naming mapping
       let mainSummary = data.summary || data.Summary || data.executive_summary || data.executiveSummary || data.description;
-      
+
       // Parse sections into a unified format: Array of { title, content }
       let unifiedSections = [];
       const rawSections = data.sections || data.Sections || data.section_summaries || data["section summaries"] || data.sectionSummaries || data.summaries || data.Summaries;
-      
+
       if (Array.isArray(rawSections)) {
         unifiedSections = rawSections.map(sec => ({
           title: safeString(sec.heading || sec.title || sec.name || sec.section || ""),
@@ -239,7 +239,7 @@ function App() {
               <p className="subtitle">Upload any PDF to extract structured section summaries, key takeaways, and keywords in seconds.</p>
             </div>
 
-            <div 
+            <div
               className={`dropzone ${dragActive ? 'drag-active' : ''}`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -247,12 +247,12 @@ function App() {
               onDrop={handleDrop}
               onClick={triggerFileSelect}
             >
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                style={{ display: 'none' }} 
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
                 accept=".pdf"
-                onChange={onFileChange} 
+                onChange={onFileChange}
               />
               <div className="dropzone-icon">
                 <IconUpload />
@@ -402,7 +402,10 @@ function App() {
           </div>
         )}
       </main>
-    </div>
+      <footer className="footer">
+        <p>By:<strong>Amandeep Singh</strong> &nbsp;|&nbsp; Contact: <a href="mailto:amandeep2975@gmail.com">amandeep2975@gmail.com</a></p>
+      </footer>
+    </div >
   );
 }
 
