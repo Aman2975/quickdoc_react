@@ -98,8 +98,14 @@ function App() {
     formData.append("file", selectedFile);
 
     try {
-      const backendHost = window.location.hostname || "localhost";
-      const response = await fetch(`http://${backendHost}:8000/uploadfile`, {
+      // Use configured API URL from environment, or fallback dynamically
+      let apiUrl = import.meta.env.VITE_API_URL;
+      if (!apiUrl || apiUrl.includes("localhost")) {
+        const backendHost = window.location.hostname || "localhost";
+        apiUrl = `http://${backendHost}:8000`;
+      }
+
+      const response = await fetch(`${apiUrl}/uploadfile`, {
         method: "POST",
         body: formData,
       });
@@ -132,6 +138,15 @@ function App() {
         }
       }
 
+      const safeString = (val) => {
+        if (!val) return "";
+        if (typeof val === 'string') return val;
+        if (typeof val === 'object') {
+          return val.summary || val.content || val.text || val.value || JSON.stringify(val);
+        }
+        return String(val);
+      };
+
       // Format document data to make sure key structures exist with fallback naming mapping
       let mainSummary = data.summary || data.Summary || data.executive_summary || data.executiveSummary || data.description;
       const summariesMap = data.summaries || data.Summaries || {};
@@ -141,12 +156,15 @@ function App() {
       }
 
       const docData = {
-        title: data.title || data.Title || data.document_title || data.documentTitle || selectedFile.name.replace(/\.[^/.]+$/, ""),
-        summary: mainSummary || "No summary provided.",
-        headings: data.headings || data.Headings || data.sections || data.Sections || [],
-        summaries: summariesMap,
-        key_points: data.key_points || data.keypoints || data.KeyPoints || data.Key_Points || data.key_takeaways || data.keyTakeaways || [],
-        keywords: data.keywords || data.Keywords || data.tags || data.Tags || []
+        title: safeString(data.title || data.Title || data.document_title || data.documentTitle || selectedFile.name.replace(/\.[^/.]+$/, "")),
+        summary: safeString(mainSummary || "No summary provided."),
+        headings: (data.headings || data.Headings || data.sections || data.Sections || []).map(safeString),
+        summaries: Object.keys(summariesMap).reduce((acc, key) => {
+          acc[key] = safeString(summariesMap[key]);
+          return acc;
+        }, {}),
+        key_points: (data.key_points || data.keypoints || data.KeyPoints || data.Key_Points || data.key_takeaways || data.keyTakeaways || []).map(safeString),
+        keywords: (data.keywords || data.Keywords || data.tags || data.Tags || []).map(safeString)
       };
 
       setActiveDoc(docData);
