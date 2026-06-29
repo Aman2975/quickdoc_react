@@ -43,6 +43,7 @@ function App() {
   const [error, setError] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [openHeadings, setOpenHeadings] = useState({});
+  const [view, setView] = useState('home');
   const fileInputRef = useRef(null);
 
   // Toggle accordion item
@@ -205,6 +206,7 @@ function App() {
     setSelectedFile(null);
     setActiveDoc(null);
     setError(null);
+    setView('home');
   };
 
   const triggerFileSelect = () => {
@@ -222,190 +224,241 @@ function App() {
           </div>
           <span className="logo-text">QuickDoc</span>
         </div>
-        {activeDoc && (
+        {activeDoc && view === 'home' && (
           <button className="btn-secondary" onClick={handleReset}>
             Analyze Another
+          </button>
+        )}
+        {view !== 'home' && (
+          <button className="btn-secondary" onClick={() => setView('home')}>
+            Back to Home
           </button>
         )}
       </header>
 
       {/* Main Content Workspace */}
       <main className="main-content">
-        {/* Step 1: Upload / Drag Drop */}
-        {!activeDoc && !isLoading && !error && (
-          <div className="upload-container">
-            <div className="header-section">
-              <h1>Instant AI Document Summarizer</h1>
-              <p className="subtitle">Upload any PDF to extract structured section summaries, key takeaways, and keywords in seconds.</p>
-            </div>
-
-            <div
-              className={`dropzone ${dragActive ? 'drag-active' : ''}`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              onClick={triggerFileSelect}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                accept=".pdf"
-                onChange={onFileChange}
-              />
-              <div className="dropzone-icon">
-                <IconUpload />
-              </div>
-              <div className="dropzone-text">
-                <h3>Drag & drop your PDF here</h3>
-                <p>or click to browse local files (max 10 MB)</p>
-              </div>
-            </div>
-
-            {selectedFile && (
-              <div className="selected-file-card">
-                <div className="file-info">
-                  <IconDocument />
-                  <span className="file-name">{selectedFile.name}</span>
+        {view === 'home' && (
+          <>
+            {/* Step 1: Upload / Drag Drop */}
+            {!activeDoc && !isLoading && !error && (
+              <div className="upload-container">
+                <div className="header-section">
+                  <h1>Instant AI Document Summarizer</h1>
+                  <p className="subtitle">Upload any PDF to extract structured section summaries, key takeaways, and keywords in seconds.</p>
                 </div>
-                <button className="btn-primary start-btn" onClick={handleStartAnalysis}>
-                  Start Analysis
+
+                <div 
+                  className={`dropzone ${dragActive ? 'drag-active' : ''}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={triggerFileSelect}
+                >
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    style={{ display: 'none' }} 
+                    accept=".pdf"
+                    onChange={onFileChange} 
+                  />
+                  <div className="dropzone-icon">
+                    <IconUpload />
+                  </div>
+                  <div className="dropzone-text">
+                    <h3>Drag & drop your PDF here</h3>
+                    <p>or click to browse local files (max 10 MB)</p>
+                  </div>
+                </div>
+
+                {selectedFile && (
+                  <div className="selected-file-card">
+                    <div className="file-info">
+                      <IconDocument />
+                      <span className="file-name">{selectedFile.name}</span>
+                    </div>
+                    <button className="btn-primary start-btn" onClick={handleStartAnalysis}>
+                      Start Analysis
+                    </button>
+                  </div>
+                )}
+
+                <div className="features-grid">
+                  <div className="feature-item">
+                    <div className="feature-title">⚡ Instant Summaries</div>
+                    <div className="feature-desc">Upload your document and let AI generate concise summaries and key takeaways automatically.</div>
+                  </div>
+                  <div className="feature-item">
+                    <div className="feature-title">Preserved Structure</div>
+                    <div className="feature-desc">Maintains headings and layouts so you can review section-by-section details seamlessly.</div>
+                  </div>
+                  <div className="feature-item">
+                    <div className="feature-title">🔒 Fast & Secure</div>
+                    <div className="feature-desc">Supports PDF documents up to 10 MB. Files are processed in memory and deleted instantly.</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {isLoading && (
+              <div className="loading-card">
+                <div className="scanner-container">
+                  <div className="scanner-icon">
+                    <IconDocument />
+                  </div>
+                  <div className="scanner-line"></div>
+                </div>
+                <div>
+                  <h3 className="pulse-text" style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
+                    Analyzing Document
+                  </h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                    Reading PDF structure and generating analysis...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="message-card" style={{ borderColor: 'rgba(239, 68, 68, 0.2)' }}>
+                <div style={{ color: 'var(--error-color)', marginBottom: '8px' }}>
+                  <IconError />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Analysis Failed</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>{error}</p>
+                <button className="btn-primary" onClick={handleReset}>
+                  Try Again
                 </button>
               </div>
             )}
 
-            <div className="features-grid">
-              <div className="feature-item">
-                <div className="feature-title">⚡ Instant Summaries</div>
-                <div className="feature-desc">Upload your document and let AI generate concise summaries and key takeaways automatically.</div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-title">Preserved Structure</div>
-                <div className="feature-desc">Maintains headings and layouts so you can review section-by-section details seamlessly.</div>
-              </div>
-              <div className="feature-item">
-                <div className="feature-title">🔒 Fast & Secure</div>
-                <div className="feature-desc">Supports PDF documents up to 10 MB. Files are processed in memory and deleted instantly.</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="loading-card">
-            <div className="scanner-container">
-              <div className="scanner-icon">
-                <IconDocument />
-              </div>
-              <div className="scanner-line"></div>
-            </div>
-            <div>
-              <h3 className="pulse-text" style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
-                Analyzing Document
-              </h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                Reading PDF structure and generating analysis...
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="message-card" style={{ borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-            <div style={{ color: 'var(--error-color)', marginBottom: '8px' }}>
-              <IconError />
-            </div>
-            <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Analysis Failed</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '16px' }}>{error}</p>
-            <button className="btn-primary" onClick={handleReset}>
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {/* Output Section */}
-        {activeDoc && !isLoading && (
-          <div className="results-card">
-            <div className="result-header">
-              <h2 className="doc-title">{activeDoc.title}</h2>
-              {activeDoc.keywords && activeDoc.keywords.length > 0 && (
-                <div className="keywords-container">
-                  {activeDoc.keywords.map((word, idx) => (
-                    <span key={idx} className="keyword-badge">#{word}</span>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="grid-two-col">
-              {/* Left Side: Summary & Keypoints */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <div className="card-inner">
-                  <div className="section-title">
-                    <IconSummary />
-                    <span>Executive Summary</span>
-                  </div>
-                  <p className="summary-content">{activeDoc.summary}</p>
-                </div>
-
-                {activeDoc.key_points && activeDoc.key_points.length > 0 && (
-                  <div className="card-inner">
-                    <div className="section-title">
-                      <IconKeyPoints />
-                      <span>Key Takeaways</span>
-                    </div>
-                    <ul className="keypoints-list">
-                      {activeDoc.key_points.map((point, idx) => (
-                        <li key={idx} className="keypoint-item">
-                          <span className="keypoint-dot"></span>
-                          <span>{point}</span>
-                        </li>
+            {/* Output Section */}
+            {activeDoc && !isLoading && (
+              <div className="results-card">
+                <div className="result-header">
+                  <h2 className="doc-title">{activeDoc.title}</h2>
+                  {activeDoc.keywords && activeDoc.keywords.length > 0 && (
+                    <div className="keywords-container">
+                      {activeDoc.keywords.map((word, idx) => (
+                        <span key={idx} className="keyword-badge">#{word}</span>
                       ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Side: Headings details accordion */}
-              <div className="card-inner" style={{ alignSelf: 'start' }}>
-                <div className="section-title">
-                  <IconHeadingList />
-                  <span>Document Structure</span>
+                    </div>
+                  )}
                 </div>
-                {activeDoc.sections && activeDoc.sections.length > 0 ? (
-                  <div className="sections-timeline">
-                    {activeDoc.sections.map((section, idx) => {
-                      const cleanTitle = section.title.replace(/^##\s+/, "");
-                      return (
-                        <div key={idx} className="timeline-item">
-                          <div className="timeline-marker">
-                            <span className="timeline-number">{idx + 1}</span>
-                          </div>
-                          <div className="timeline-content">
-                            <h4 className="timeline-title">{cleanTitle}</h4>
-                            <p className="timeline-desc">{section.content}</p>
-                          </div>
+
+                <div className="grid-two-col">
+                  {/* Left Side: Summary & Keypoints */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div className="card-inner">
+                      <div className="section-title">
+                        <IconSummary />
+                        <span>Executive Summary</span>
+                      </div>
+                      <p className="summary-content">{activeDoc.summary}</p>
+                    </div>
+
+                    {activeDoc.key_points && activeDoc.key_points.length > 0 && (
+                      <div className="card-inner">
+                        <div className="section-title">
+                          <IconKeyPoints />
+                          <span>Key Takeaways</span>
                         </div>
-                      );
-                    })}
+                        <ul className="keypoints-list">
+                          {activeDoc.key_points.map((point, idx) => (
+                            <li key={idx} className="keypoint-item">
+                              <span className="keypoint-dot"></span>
+                              <span>{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', fontStyle: 'italic' }}>
-                    No structured headings detected.
-                  </p>
-                )}
+
+                  {/* Right Side: Headings details accordion */}
+                  <div className="card-inner" style={{ alignSelf: 'start' }}>
+                    <div className="section-title">
+                      <IconHeadingList />
+                      <span>Document Structure</span>
+                    </div>
+                    {activeDoc.sections && activeDoc.sections.length > 0 ? (
+                      <div className="sections-timeline">
+                        {activeDoc.sections.map((section, idx) => {
+                          const cleanTitle = section.title.replace(/^##\s+/, "");
+                          return (
+                            <div key={idx} className="timeline-item">
+                              <div className="timeline-marker">
+                                <span className="timeline-number">{idx + 1}</span>
+                              </div>
+                              <div className="timeline-content">
+                                <h4 className="timeline-title">{cleanTitle}</h4>
+                                <p className="timeline-desc">{section.content}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px', fontStyle: 'italic' }}>
+                        No structured headings detected.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
+            )}
+          </>
+        )}
+
+        {view === 'about' && (
+          <div className="text-page-card">
+            <h2 className="page-title">About QuickDoc</h2>
+            <div className="page-content">
+              <p>QuickDoc is a fast, layout-preserving AI document summarizer built to help you digest large PDF documents in seconds.</p>
+              <p>Simply upload your document (up to 10 MB), and our intelligence engine will extract section structures, compile an executive summary, and highlight key takeaways instantly.</p>
+              
+              <h3>How it works:</h3>
+              <ul className="ordered-list">
+                <li><strong>1. Upload:</strong> You select or drag and drop any PDF file.</li>
+                <li><strong>2. Extract:</strong> The system securely extracts the layout structure and headings from your file.</li>
+                <li><strong>3. Analyze:</strong> Our advanced language model analyzes each section to synthesize structural summaries and key highlights.</li>
+                <li><strong>4. Present:</strong> A clear, interactive dashboard displays the takeaways.</li>
+              </ul>
+              
+              <p>QuickDoc is developed and maintained by Amandeep Singh.</p>
+            </div>
+          </div>
+        )}
+
+        {view === 'privacy' && (
+          <div className="text-page-card">
+            <h2 className="page-title">Privacy Policy</h2>
+            <div className="page-content">
+              <p>At QuickDoc, we take your document privacy seriously. Here is how we handle your data:</p>
+              
+              <ul className="unordered-list">
+                <li><strong>No Persistent Storage:</strong> Uploaded documents are processed in-memory (or temporarily saved) during translation and deleted immediately after analysis is complete. We do not store your PDFs on our servers.</li>
+                <li><strong>No Data Logging:</strong> We do not log the text content of your documents or any extracted summaries.</li>
+                <li><strong>Anonymous Metrics:</strong> We use Vercel Analytics to collect general, anonymous traffic and usage statistics to improve performance and user experience.</li>
+              </ul>
+              
+              <p>If you have any questions or concerns about data privacy, feel free to contact us at <a href="mailto:amandeep2975@gmail.com">amandeep2975@gmail.com</a>.</p>
             </div>
           </div>
         )}
       </main>
       <footer className="footer">
-        <p>By:<strong>Amandeep Singh</strong> &nbsp;|&nbsp; Contact: <a href="mailto:amandeep2975@gmail.com">amandeep2975@gmail.com</a></p>
+        <div className="footer-nav">
+          <button className="footer-nav-btn" onClick={() => setView('about')}>About</button>
+          <span className="footer-separator">•</span>
+          <button className="footer-nav-btn" onClick={() => setView('privacy')}>Privacy Policy</button>
+        </div>
+        <p>By: <strong>Amandeep Singh</strong> &nbsp;|&nbsp; Contact: <a href="mailto:amandeep2975@gmail.com">amandeep2975@gmail.com</a></p>
       </footer>
-    </div >
+    </div>
   );
 }
 
